@@ -36,9 +36,11 @@ int main(int argc, char* argv[])
   pid_t pid;
   char** history = (char**)calloc(10, sizeof(char**));
   int historyLoc = -1; 
+  int addHistory = 1;
 
   while (TRUE)
   {
+    addHistory = 1;
     printf("myShell> ");
     fflush(stdout);
     args = getInput();
@@ -49,12 +51,14 @@ int main(int argc, char* argv[])
         break;
       }
       if(strcmp(args[0], "!!") == 0) { // if the user is using most recent command
+        addHistory = 0;
         if(historyLoc != -1)
           args = parseInput(history[historyLoc % 10]);
         else
           printf("No history to execute\n");
       }
       if(args[0][0] == '!') { // if user is using Nth most recent command
+        addHistory = 0;
         if(args[0][1] - '0' == 1 && args[0][2] && args[0][2] - '0' != 0) { // ensure N is less than 11
           printf("Error, number exceeds history capacity\n");
         } else {
@@ -72,7 +76,7 @@ int main(int argc, char* argv[])
         
       } 
       // see if the command was history, if so, display it
-      if(strcmp(args[0], "history") == 0) {
+      if(strcmp(args[0], "history") == 0 || addHistory == 0) {
         dispHistory(history, historyLoc);
       } else { // if not, add command to history
         addToHistory(args, history, historyLoc);
@@ -110,7 +114,6 @@ char* retrieveLine(char** args) {
   char* outputStart = output;
   int i = 0;
   while(args[i]) {
-    printf("Found a &\n");
     char* arg = args[i];
     while(*arg) {
       *outputStart = *arg++;
@@ -122,7 +125,6 @@ char* retrieveLine(char** args) {
     *outputStart++;
   }
   *outputStart = '\0';
-  printf("Here is output: %s\n", output);
   return output;
 }
 

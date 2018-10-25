@@ -26,6 +26,8 @@ void addToHistory(char**, char**, int);
 char* retrieveLine(char**);
 void dispHistory(char**, int);
 
+int willWait;
+
 int main(int argc, char* argv[])
 {
   //A pointer to an array of pointers to char.  In essence, an array of 
@@ -40,6 +42,10 @@ int main(int argc, char* argv[])
 
   while (TRUE)
   {
+    if(willWait == 1) {
+      wait(NULL);
+    }
+    willWait = 1;
     addHistory = 1;
     printf("myShell> ");
     fflush(stdout);
@@ -84,17 +90,29 @@ int main(int argc, char* argv[])
         historyLoc = historyLoc % 10;
       }
 
+      int j = 0;
+      while(args[j]) {
+        if(args[j][0] == '&') {
+          args[j] = NULL;
+          willWait = 0;
+        }
+        j++;
+      }
+
       // create child process
       pid = fork();
 
       if (pid < 0) { // fork failed
         printf("Fork failed\n");
       } else {
+        
         if (pid == 0) { // child process
           execvp(args[0],args);
           break; //exit child process as soon as it has executed command
-        } else if (args[argc-1][0] != '&') { // parent process
-          wait(NULL); // wait till the child process is done
+        } else  { // parent process
+          if(willWait == 1){
+            wait(NULL);
+          }
         }
       }
     }
@@ -157,19 +175,21 @@ char** parseInput(char* inp)
   int wordCount = wc(inp);
   char** array = (char**)calloc(wordCount+1,sizeof(char**));
   int i;
+
   
   char* word; 
   for (i = 0; i < wordCount; i++) {
+    while(*inp == ' ') {
+      *inp++;
+    }
     word = (char*) malloc(20);
     array[i] = word;
-    if (*inp != '&') {
+    
       while (*inp && *inp != ' ') {
         *word = *inp++;
         *word++;
       }
-    } else {
-      array[i] = NULL;
-    }
+    
     
     *word = '\0';
     *inp++;

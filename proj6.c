@@ -18,8 +18,8 @@ Usage: 1) ./a.out
 #include <string.h>
 
 #define INIT_MUTEX 1
-#define INIT_EMPTY 2 
-#define INIT_FULL  2 
+#define INIT_EMPTY 100 
+#define INIT_FULL  0
 #define EMPTY_ARG  0 //used when argument is optional 
 
 const int PROD = 0;
@@ -99,7 +99,7 @@ void producer(sem_struct* up, sem_struct* down, int mutex, int empty, int full) 
         if (semop(empty, down, 1) == -1)
             fatal_error("mutex"); 
         // mutex.down();
-        while(semctl(mutex, 0, GETVAL, 0) == 0);
+        while(semctl(mutex, 0, GETVAL, 0) != INIT_MUTEX);
         if (semop(mutex, down, 1) == -1)
             fatal_error("empty"); 
         
@@ -126,7 +126,7 @@ void consumer(sem_struct* up, sem_struct* down, int mutex, int empty, int full) 
         if (semop(full, down, 1) == -1)
             fatal_error("mutex"); 
         // mutex.down();
-        while(semctl(mutex, 0, GETVAL, 0) == 0);
+        while(semctl(mutex, 0, GETVAL, 0) != INIT_MUTEX);
         if (semop(mutex, down, 1) == -1)
             fatal_error("mutex"); 
         criticalSection(CONS);

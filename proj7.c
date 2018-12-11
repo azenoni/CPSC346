@@ -97,11 +97,12 @@ void* writeThread(void* param_in) {
     int* pipe = p->pipe;
     //close(pipe[0]);
     while (nums_generated < p->num) {
-        int r = rand() % 157;
+        int r = rand() % 100;
         // write it to the pipe;
         printf("Generated: %d\n", r);
         write(pipe[1], &r, sizeof(r));
         nums_generated++;
+        // sleep(2);
     } 
     //close pipe  //reader does not block when reading a closed pipe
     close(pipe[1]);
